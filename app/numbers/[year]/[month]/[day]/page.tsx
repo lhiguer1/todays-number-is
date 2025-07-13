@@ -1,28 +1,42 @@
 import { getLynchNumbers } from 'app/numbers/utils'
 import { notFound } from 'next/navigation'
 
-export function generateMetadata({ params: { year, month, day } }) {
-  let lynchNumber = getLynchNumbers().find((lynchNumber) => lynchNumber.date.getFullYear() === Number(year) && lynchNumber.date.getMonth() === Number(month - 1) && lynchNumber.date.getDate() === Number(day))
-  if (lynchNumber) {
+export async function generateMetadata({ params }) {
+  let { year, month, day } = await params
+  let yearInt = Number(year)
+  let monthInt = Number(month)
+  let dayInt = Number(day)
+  let date = new Date(yearInt, monthInt - 1, dayInt)
+
+  let allLynchNumbers = getLynchNumbers()
+  let dayLynchNumber = allLynchNumbers.find((lynchNumber) => lynchNumber.date.toISOString().split('T')[0] === date.toISOString().split('T')[0])
+
+  if (dayLynchNumber) {
     return {
-      title: new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(lynchNumber.date),
+      title: new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(dayLynchNumber.date),
     }
   }
 }
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   let allLynchNumbers = getLynchNumbers()
 
   return allLynchNumbers.map((lynchNumber) => ({
     year: String(lynchNumber.date.getFullYear()),
-    month: String(lynchNumber.date.getMonth() + 1),
-    day: String(lynchNumber.date.getDate()),
+    month: String(lynchNumber.date.getMonth() + 1).padStart(2, '0'),
+    day: String(lynchNumber.date.getDate()).padStart(2, '0'),
   }))
 }
 
-export default function Page({ params }) {
+export default async function Page({ params }) {
+  let { year, month, day } = await params
+  let yearInt = Number(year)
+  let monthInt = Number(month)
+  let dayInt = Number(day)
+  let date = new Date(yearInt, monthInt - 1, dayInt)
+
   let allLynchNumbers = getLynchNumbers()
-  let dayLynchNumber = allLynchNumbers.find((lynchNumber) => lynchNumber.date.getFullYear() === Number(params.year) && lynchNumber.date.getMonth() === Number(params.month - 1) && lynchNumber.date.getDate() === Number(params.day))
+  let dayLynchNumber = allLynchNumbers.find((lynchNumber) => lynchNumber.date.toISOString().split('T')[0] === date.toISOString().split('T')[0])
 
   if (!dayLynchNumber) {
     notFound()

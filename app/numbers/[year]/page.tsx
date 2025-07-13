@@ -2,26 +2,30 @@ import { LynchNumbers } from 'app/components/lynchnumbers'
 import { getLynchNumbers } from 'app/numbers/utils'
 import { notFound } from 'next/navigation'
 
-export function generateMetadata({ params: { year } }) {
+export async function generateMetadata({ params }) {
+  let { year } = await params
   return {
     title: year,
   }
 }
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   let allLynchNumbers = getLynchNumbers()
+  let uniqueYears = Array.from(new Set(allLynchNumbers.map((lynchNumber) => lynchNumber.date.getFullYear())))
 
-  return allLynchNumbers.map((lynchNumber) => ({
-    year: String(lynchNumber.date.getFullYear()),
+  return uniqueYears.map((year) => ({
+    year: String(year),
   }))
 }
 
-export default function Page({ params }) {
-  let allLynchNumbers = getLynchNumbers()
-  let yearLynchNumbers = allLynchNumbers
-    .filter((lynchNumber) => lynchNumber.date.getFullYear() === Number(params.year))
+export default async function Page({ params }) {
+  let { year } = await params
+  let yearInt = Number(year)
 
-  if (!yearLynchNumbers.length) {
+  let allLynchNumbers = getLynchNumbers()
+  let yearLynchNumbers = allLynchNumbers.filter((lynchNumber) => lynchNumber.date.getFullYear() === yearInt)
+
+  if (yearLynchNumbers.length === 0) {
     notFound()
   }
 
