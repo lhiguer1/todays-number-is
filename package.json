@@ -3,7 +3,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "zip": "cd out && zip -r ../$(git rev-parse --short HEAD).zip .",
+    "package": "npm run build && npm run zip"
   },
   "dependencies": {
     "@tailwindcss/postcss": "4.0.0-alpha.13",
