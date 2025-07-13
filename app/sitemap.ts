@@ -1,17 +1,16 @@
-import { getBlogPosts } from 'app/blog/utils'
-
-export const baseUrl = 'https://portfolio-blog-starter.vercel.app'
+import { getLynchNumbers } from 'app/numbers/utils'
+export const baseUrl = 'https://numbers.vercel.app'
 
 export default async function sitemap() {
-  let blogs = getBlogPosts().map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.metadata.publishedAt,
+  let lynchNumbers = getLynchNumbers().map((lynchNumber) => ({
+    url: `${baseUrl}/numbers/${lynchNumber.date.getFullYear()}/${lynchNumber.date.getMonth() + 1}/${lynchNumber.date.getDate()}`,
+    lastModified: lynchNumber.date.toISOString().split('T')[0],
   }))
 
-  let routes = ['', '/blog'].map((route) => ({
+  let routes = ['', '/numbers'].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split('T')[0],
   }))
 
-  return [...routes, ...blogs]
+  return [...routes, ...lynchNumbers]
 }
